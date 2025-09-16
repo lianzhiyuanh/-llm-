@@ -1,0 +1,4 @@
+chromadb
+Flask
+Flask-Cors
+requests

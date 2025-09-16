@@ -1,0 +1,265 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f0f2f5;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    display: flex;
+    width: 100%;
+    max-width: 1200px;
+    height: 90vh;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.settings-panel {
+    width: 320px;
+    padding: 20px;
+    background-color: #f7f9fa;
+    border-right: 1px solid #e0e0e0;
+    overflow-y: auto;
+}
+
+.settings-panel h2 {
+    margin-top: 0;
+    margin-bottom: 24px;
+    font-size: 20px;
+    color: #333;
+}
+
+.setting {
+    margin-bottom: 20px;
+}
+
+.setting label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+}
+
+.setting input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+}
+
+.config-management {
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+}
+
+.config-management h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 16px;
+    color: #333;
+}
+
+.config-management button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    margin-right: 10px;
+}
+
+.config-management button:hover {
+    background-color: #0056b3;
+}
+
+#delete-config-btn {
+    background-color: #dc3545;
+}
+
+#delete-config-btn:hover {
+    background-color: #c82333;
+}
+
+.setting input[type="password"],
+.setting select,
+.setting textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.setting textarea {
+    resize: vertical;
+}
+
+.setting.checkbox {
+    display: flex;
+    align-items: center;
+}
+
+.setting.checkbox input {
+    margin-right: 8px;
+}
+
+
+.chat-panel {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.chat-history {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.message {
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    border-radius: 18px;
+    max-width: 80%;
+    line-height: 1.5;
+}
+
+.user-message {
+    background-color: #007bff;
+    color: white;
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+.bot-message {
+    background-color: #e9ecef;
+    color: #333;
+    align-self: flex-start;
+}
+
+.chat-input-area {
+    display: flex;
+    padding: 20px;
+}
+
+#chat-input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: none;
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+#send-btn {
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#send-btn:hover {
+    background-color: #0056b3;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    body {
+        padding: 0;
+    }
+    .container {
+        flex-direction: column;
+        height: 100vh;
+        border-radius: 0;
+    }
+    .settings-panel {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #e0e0e0;
+        max-height: 50vh;
+        box-sizing: border-box;
+    }
+}
+
+/* 增强检索设置 */
+.rag-settings {
+    border-top: 1px solid #e0e0e0;
+    margin-top: 20px;
+    padding-top: 20px;
+}
+
+.rag-settings h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 18px;
+}
+
+.knowledge-base-files {
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.knowledge-base-files div {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+#load-kb-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+#load-kb-btn:hover {
+    background-color: #218838;
+}
+
+.rag-settings input[type="text"],
+.rag-settings input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.llm-config-group {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 15px;
+    margin-top: 20px;
+    background-color: #fff;
+}
+
+.llm-config-group h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 16px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
