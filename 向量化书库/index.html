@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini 对话系统</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="settings-panel">
+            <h2>设置</h2>
+
+            <div class="config-management">
+                <h4>配置管理</h4>
+                <div class="setting">
+                    <label for="config-name">配置名称:</label>
+                    <input type="text" id="config-name" placeholder="输入配置名称...">
+                </div>
+                <div class="setting">
+                    <button id="save-config-btn">保存当前配置</button>
+                    <button id="delete-config-btn">删除选中配置</button>
+                </div>
+                <div class="setting">
+                    <label for="config-select">加载配置:</label>
+                    <select id="config-select">
+                        <option value="">选择一个配置...</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- API 密钥输入框已被移除，请在 config.js 中配置 -->
+
+            <!-- 主模型设置 (非RAG模式) -->
+            <div class="llm-config-group">
+                <h4>主模型设置 (非RAG)</h4>
+                <div class="setting">
+                    <label for="system-prompt">系统提示词:</label>
+                    <textarea id="system-prompt" rows="4" placeholder="在此输入系统级提示词..."></textarea>
+                </div>
+                <div class="setting">
+                    <label for="model-select">模型:</label>
+                    <select id="model-select">
+                        <option value="gemini-2.5-pro" selected>Gemini 2.5 Pro</option>
+                        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                    </select>
+                </div>
+                 <div class="setting">
+                    <label for="temperature">温度: <span id="temperature-value">1.0</span></label>
+                    <input type="range" id="temperature" min="0" max="2" step="0.05" value="1.0">
+                </div>
+                <div class="setting">
+                    <label for="top-p">Top P: <span id="top-p-value">0.95</span></label>
+                    <input type="range" id="top-p" min="0" max="1" step="0.01" value="0.95">
+                </div>
+                <div class="setting">
+                    <label for="max-output-tokens">最大回复长度: <span id="max-output-tokens-value">8192</span></label>
+                    <input type="range" id="max-output-tokens" min="1" max="8192" value="8192">
+                </div>
+                 <div class="setting checkbox">
+                    <input type="checkbox" id="stream-output" checked>
+                    <label for="stream-output">流式传输</label>
+                </div>
+            </div>
+
+            <!-- 增强检索设置 -->
+            <div class="rag-settings">
+                <h3>增强检索 (RAG)</h3>
+                <div class="setting checkbox">
+                    <input type="checkbox" id="rag-enabled">
+                    <label for="rag-enabled">启用增强检索</label>
+                </div>
+                
+                <div class="setting">
+                    <label>知识库文件:</label>
+                    <div id="knowledge-base-files" class="knowledge-base-files">
+                        <!-- 文件列表将由JS动态填充 -->
+                    </div>
+                    <button id="load-kb-btn">加载选中文件到数据库</button>
+                </div>
+
+                <div class="setting">
+                    <label for="metadata-keyword">元数据关键词:</label>
+                    <input type="text" id="metadata-keyword" placeholder="例如: category=技术">
+                </div>
+                
+                <div class="setting">
+                    <label for="vector-results">向量搜索结果数:</label>
+                    <input type="number" id="vector-results" value="2" min="1">
+                </div>
+
+                <div class="setting">
+                    <label for="metadata-results">元数据搜索结果数:</label>
+                    <input type="number" id="metadata-results" value="2" min="1">
+                </div>
+                
+                <div class="setting">
+                    <label for="metadata-schema">元数据格式定义 (JSON):</label>
+                    <textarea id="metadata-schema" rows="4" placeholder='{"source": "来源", "category": "分类", "tags": "标签"}'></textarea>
+                </div>
+
+                <div class="setting">
+                    <label for="rerank-api-url">重排 API 地址:</label>
+                    <input type="text" id="rerank-api-url" value="https://api.siliconflow.cn/v1/rerank">
+                </div>
+
+                <div class="setting">
+                    <label for="recall-mode">召回模式:</label>
+                    <select id="recall-mode">
+                        <option value="hybrid" selected>混合搜索</option>
+                        <option value="vector">仅向量搜索</option>
+                        <option value="metadata">仅元数据搜索</option>
+                    </select>
+                </div>
+
+                <!-- LLM1 设置 -->
+                <div class="llm-config-group">
+                    <h4>LLM1 设置 (查询改写)</h4>
+                    <div class="setting">
+                        <label for="llm1-prompt">提示词:</label>
+                        <textarea id="llm1-prompt" rows="3"># 角色
+你是一名精通3GPP 5G协议（特别是TS 38.331）的通信技术专家。
+
+# 任务
+你的任务是分析用户的原始问题，并将其转换成一个结构化的JSON对象，用于后续在技术文档知识库中进行高效的混合搜索。你需要对问题进行修正、扩展，并提取出关键的搜索指令。
+
+# 知识库元数据说明
+知识库中的每个文本块都包含以下元数据：
+- `section_number`: 章节号 (e.g., "4.2.1")
+- `section_title`: 章节标题 (e.g., "RRC_IDLE")
+- `content_type`: 内容类型，可能的值包括 "prose" (普通散文), "procedure" (流程), "asn1_definition" (ASN.1定义), "abbreviation" (缩略语)
+
+# 输出格式
+请严格按照以下JSON格式输出，不要添加任何额外的解释：
+{
+  "corrected_query": "对用户问题的修正和翻译后的版本",
+  "vector_query_expansion": "一段为向量搜索生成的、包含丰富上下文和同义词的扩展描述",
+  "keywords": ["用于关键词搜索的核心技术术语列表"],
+  "metadata_filters": {
+    "content_type": "根据问题猜测的最可能的内容类型",
+    "section_number_prefix": "根据问题猜测的最可能相关的章节号前缀"
+  }
+}
+
+# 示例
+用户问题: "rrc a ue é o que"
+你的输出:
+{
+  "corrected_query": "UE的RRC状态有哪些",
+  "vector_query_expansion": "解释在5G NR网络中，用户设备（User Equipment, UE）的无线资源控制（Radio Resource Control, RRC）状态机是如何定义的，包括RRC连接态（RRC_CONNECTED）、RRC空闲态（RRC_IDLE）和RRC非激活态（RRC_INACTIVE）之间的区别和转换条件。",
+  "keywords": ["RRC", "UE states", "RRC_IDLE", "RRC_CONNECTED", "RRC_INACTIVE", "state transition"],
+  "metadata_filters": {
+    "content_type": "prose",
+    "section_number_prefix": "4.2"
+  }
+}
+
+用户问题: "UplinkTxSwitchingBand 的asn1"
+你的输出:
+{
+  "corrected_query": "UplinkTxSwitchingBand 的 ASN.1 定义",
+  "vector_query_expansion": "查找3GPP TS 38.331协议中关于 UplinkTxSwitchingAssociatedBandDualUL-r18 或 UplinkTxSwitchingBandIndex-r18 的ASN.1（Abstract Syntax Notation One）具体定义，包括其SEQUENCE结构和包含的字段。",
+  "keywords": ["UplinkTxSwitchingBand", "UplinkTxSwitchingAssociatedBandDualUL", "ASN.1", "SEQUENCE"],
+  "metadata_filters": {
+    "content_type": "asn1_definition",
+    "section_number_prefix": ""
+  }
+}
+
+# 开始处理
+用户问题: "{{user_query}}"</textarea>
+                    </div>
+                    <div class="setting">
+                        <label for="llm1-model-select">模型:</label>
+                        <select id="llm1-model-select">
+                            <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                            <option value="gemini-2.5-flash" selected>Gemini 2.5 Flash</option>
+                        </select>
+                    </div>
+                    <div class="setting">
+                        <label for="llm1-temperature">温度: <span id="llm1-temperature-value">0.5</span></label>
+                        <input type="range" id="llm1-temperature" min="0" max="2" step="0.05" value="0.5">
+                    </div>
+                    <div class="setting">
+                        <label for="llm1-top-p">Top P: <span id="llm1-top-p-value">1.0</span></label>
+                        <input type="range" id="llm1-top-p" min="0" max="1" step="0.01" value="1.0">
+                    </div>
+                    <div class="setting">
+                        <label for="llm1-max-output-tokens">最大回复长度: <span id="llm1-max-output-tokens-value">2048</span></label>
+                        <input type="range" id="llm1-max-output-tokens" min="1" max="8192" value="2048">
+                    </div>
+                </div>
+
+                <!-- LLM2 设置 -->
+                <div class="llm-config-group">
+                    <h4>LLM2 设置 (最终回答)</h4>
+                     <div class="setting">
+                        <label for="llm2-prompt">提示词:</label>
+                        <textarea id="llm2-prompt" rows="5"># 角色
+你是一名严谨、细致的5G通信技术专家和文档工程师。
+
+# 核心任务
+你的任务是根据下面提供的“背景知识”（一系列从3GPP TS 38.331协议中检索到的文本块），清晰、准确、全面地回答用户的“原始问题”。
+
+# 行为准则 (非常重要)
+1.  **严格遵循背景知识**: 你的回答必须完全基于提供的“背景知识”。禁止使用任何外部或你自己的先验知识。
+2.  **必须引用来源**: 当你使用某段背景知识中的信息时，必须在句末或段落末尾使用 `[Source: section_number]` 的格式注明其来源。如果一个信息点整合自多个来源，可以列出所有来源，例如 `[Source: 4.2.1, 4.2.2]`。
+3.  **信息不足时明确说明**: 如果“背景知识”中没有足够的信息来回答用户的问题，你必须直接说明“根据提供的文档，无法找到关于...的明确信息。”，然后可以简要总结文档中包含哪些相关内容。绝不允许猜测或编造答案。
+4.  **清晰组织**: 使用Markdown格式（例如标题、列表、粗体）来组织你的回答，使其清晰易读。如果问题涉及流程，请使用分步列表。
+5.  **专业且客观**: 保持专业、客观的语气，直接陈述事实，避免使用口语化或不确定的词语。
+
+# 输入内容
+
+[背景知识]
+{{retrieved_contexts}}
+---
+[原始问题]
+{{user_query}}
+
+# 开始回答</textarea>
+                    </div>
+                    <div class="setting">
+                        <label for="llm2-model-select">模型:</label>
+                        <select id="llm2-model-select">
+                            <option value="gemini-2.5-pro" selected>Gemini 2.5 Pro</option>
+                            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                        </select>
+                    </div>
+                    <div class="setting">
+                        <label for="llm2-temperature">温度: <span id="llm2-temperature-value">1.0</span></label>
+                        <input type="range" id="llm2-temperature" min="0" max="2" step="0.05" value="1.0">
+                    </div>
+                    <div class="setting">
+                        <label for="llm2-top-p">Top P: <span id="llm2-top-p-value">0.95</span></label>
+                        <input type="range" id="llm2-top-p" min="0" max="1" step="0.01" value="0.95">
+                    </div>
+                    <div class="setting">
+                        <label for="llm2-max-output-tokens">最大回复长度: <span id="llm2-max-output-tokens-value">8192</span></label>
+                        <input type="range" id="llm2-max-output-tokens" min="1" max="8192" value="8192">
+                    </div>
+                    <div class="setting checkbox">
+                        <input type="checkbox" id="llm2-stream-output" checked>
+                        <label for="llm2-stream-output">流式传输</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-panel">
+            <div class="chat-history" id="chat-history">
+                <!-- 聊天消息将在这里显示 -->
+            </div>
+            <div class="chat-input-area">
+                <textarea id="chat-input" placeholder="输入你的消息..."></textarea>
+                <button id="send-btn">发送</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 通过添加时间戳查询参数来强制浏览器加载最新的JS文件，避免缓存问题
+        document.write(`<script src="config.js?v=${new Date().getTime()}"><\/script>`);
+        document.write(`<script src="script.js?v=${new Date().getTime()}"><\/script>`);
+    </script>
+</body>
+</html>
