@@ -1,0 +1,8 @@
+# Core dependencies for the 3GPP RAG project
+langchain
+langchain-community
+langchain-openai
+tiktoken
+# chromadb is used by the original script but not in the final version. 
+# Included for potential future use with local vector stores.
+chromadb
