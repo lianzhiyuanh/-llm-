@@ -1,0 +1,6 @@
+// 请将您的 API 密钥存放在此处
+// 将下面的 YOUR_API_KEY_HERE 替换为您的真实密钥
+window.APP_CONFIG = {
+  GEMINI_API_KEY: 'YOUR_GEMINI_API_KEY_HERE',
+  RERANK_API_KEY: 'YOUR_RERANK_API_KEY_HERE'
+};

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini 对话系统</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="settings-panel">
+            <h2>设置</h2>
+
+            <div class="setting">
+                <label for="api-key">API 密钥</label>
+                <input type="password" id="api-key" placeholder="在此输入你的 API 密钥">
+            </div>
+
+            <!-- 主模型设置 (非RAG模式) -->
+            <div class="llm-config-group">
+                <h4>主模型设置 (非RAG)</h4>
+                <div class="setting">
+                    <label for="system-prompt">系统提示词:</label>
+                    <textarea id="system-prompt" rows="4" placeholder="在此输入系统级提示词..."></textarea>
+                </div>
+                <div class="setting">
+                    <label for="model-select">模型:</label>
+                    <select id="model-select">
+                        <option value="gemini-2.5-pro" selected>Gemini 2.5 Pro</option>
+                        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                    </select>
+                </div>
+                 <div class="setting">
+                    <label for="temperature">温度: <span id="temperature-value">1.0</span></label>
+                    <input type="range" id="temperature" min="0" max="2" step="0.05" value="1.0">
+                </div>
+                <div class="setting">
+                    <label for="top-p">Top P: <span id="top-p-value">0.95</span></label>
+                    <input type="range" id="top-p" min="0" max="1" step="0.01" value="0.95">
+                </div>
+                <div class="setting">
+                    <label for="max-output-tokens">最大回复长度: <span id="max-output-tokens-value">8192</span></label>
+                    <input type="range" id="max-output-tokens" min="1" max="8192" value="8192">
+                </div>
+                 <div class="setting checkbox">
+                    <input type="checkbox" id="stream-output" checked>
+                    <label for="stream-output">流式传输</label>
+                </div>
+            </div>
+
+            <!-- 增强检索设置 -->
+            <div class="rag-settings">
+                <h3>增强检索 (RAG)</h3>
+                <div class="setting checkbox">
+                    <input type="checkbox" id="rag-enabled">
+                    <label for="rag-enabled">启用增强检索</label>
+                </div>
+                
+                <div class="setting">
+                    <label>知识库文件:</label>
+                    <div id="knowledge-base-files" class="knowledge-base-files">
+                        <!-- 文件列表将由JS动态填充 -->
+                    </div>
+                    <button id="load-kb-btn">加载选中文件到数据库</button>
+                </div>
+
+                <div class="setting">
+                    <label for="metadata-keyword">元数据关键词:</label>
+                    <input type="text" id="metadata-keyword" placeholder="例如: category=技术">
+                </div>
+                
+                <div class="setting">
+                    <label for="vector-results">向量搜索结果数:</label>
+                    <input type="number" id="vector-results" value="2" min="1">
+                </div>
+
+                <div class="setting">
+                    <label for="metadata-results">元数据搜索结果数:</label>
+                    <input type="number" id="metadata-results" value="2" min="1">
+                </div>
+                
+                <div class="setting">
+                    <label for="metadata-schema">元数据格式定义 (JSON):</label>
+                    <textarea id="metadata-schema" rows="4" placeholder='{"source": "来源", "category": "分类", "tags": "标签"}'></textarea>
+                </div>
+
+                <div class="setting">
+                    <label for="rerank-api-url">重排 API 地址:</label>
+                    <input type="text" id="rerank-api-url" placeholder="例如: https://api.example.com/rerank">
+                </div>
+
+                <div class="setting">
+                    <label for="recall-mode">召回模式:</label>
+                    <select id="recall-mode">
+                        <option value="hybrid" selected>混合搜索</option>
+                        <option value="vector">仅向量搜索</option>
+                        <option value="metadata">仅元数据搜索</option>
+                    </select>
+                </div>
+
+                <!-- LLM1 设置 -->
+                <div class="llm-config-group">
+                    <h4>LLM1 设置 (查询改写)</h4>
+                    <div class="setting">
+                        <label for="llm1-prompt">提示词:</label>
+                        <textarea id="llm1-prompt" rows="3"></textarea>
+                    </div>
+                    <div class="setting">
+                        <label for="llm1-model-select">模型:</label>
+                        <select id="llm1-model-select">
+                            <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                            <option value="gemini-2.5-flash" selected>Gemini 2.5 Flash</option>
+                        </select>
+                    </div>
+                    <div class="setting">
+                        <label for="llm1-temperature">温度: <span id="llm1-temperature-value">0.5</span></label>
+                        <input type="range" id="llm1-temperature" min="0" max="2" step="0.05" value="0.5">
+                    </div>
+                    <div class="setting">
+                        <label for="llm1-top-p">Top P: <span id="llm1-top-p-value">1.0</span></label>
+                        <input type="range" id="llm1-top-p" min="0" max="1" step="0.01" value="1.0">
+                    </div>
+                    <div class="setting">
+                        <label for="llm1-max-output-tokens">最大回复长度: <span id="llm1-max-output-tokens-value">2048</span></label>
+                        <input type="range" id="llm1-max-output-tokens" min="1" max="8192" value="2048">
+                    </div>
+                </div>
+
+                <!-- LLM2 设置 -->
+                <div class="llm-config-group">
+                    <h4>LLM2 设置 (最终回答)</h4>
+                     <div class="setting">
+                        <label for="llm2-prompt">提示词:</label>
+                        <textarea id="llm2-prompt" rows="5"></textarea>
+                    </div>
+                    <div class="setting">
+                        <label for="llm2-model-select">模型:</label>
+                        <select id="llm2-model-select">
+                            <option value="gemini-2.5-pro" selected>Gemini 2.5 Pro</option>
+                            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                        </select>
+                    </div>
+                    <div class="setting">
+                        <label for="llm2-temperature">温度: <span id="llm2-temperature-value">1.0</span></label>
+                        <input type="range" id="llm2-temperature" min="0" max="2" step="0.05" value="1.0">
+                    </div>
+                    <div class="setting">
+                        <label for="llm2-top-p">Top P: <span id="llm2-top-p-value">0.95</span></label>
+                        <input type="range" id="llm2-top-p" min="0" max="1" step="0.01" value="0.95">
+                    </div>
+                    <div class="setting">
+                        <label for="llm2-max-output-tokens">最大回复长度: <span id="llm2-max-output-tokens-value">8192</span></label>
+                        <input type="range" id="llm2-max-output-tokens" min="1" max="8192" value="8192">
+                    </div>
+                    <div class="setting checkbox">
+                        <input type="checkbox" id="llm2-stream-output" checked>
+                        <label for="llm2-stream-output">流式传输</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-panel">
+            <div class="chat-history" id="chat-history">
+                <!-- 聊天消息将在这里显示 -->
+            </div>
+            <div class="chat-input-area">
+                <textarea id="chat-input" placeholder="输入你的消息..."></textarea>
+                <button id="send-btn">发送</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
